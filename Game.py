@@ -1,12 +1,16 @@
 import pygame
 import random
-import math
+
 pygame.init()
 screen = pygame.display.set_mode((800,800))
-pygame.display.set_caption('Game')
+pygame.display.set_caption('Just Dodge 4Head')
 playerImage = pygame.image.load("player.png")
 playerImage = pygame.transform.scale(playerImage, (50, 50))
+baronImage = pygame.image.load("baron.png")
+baronImage = pygame.transform.scale(baronImage, (200, 300))
 
+font = pygame.font.Font('Font.ttf', 44)
+health = 10000
 
 x = 400
 y = 400
@@ -18,8 +22,19 @@ yDist = 0
 mX = 0
 mY = 0
 
-def player(x,y):
-    screen.blit(playerImage, (x,y))
+def convert(variable, leftMin, leftMax, rightMin, rightMax):
+    leftSpan = leftMax - leftMin
+    rightSpan = rightMax - rightMin
+    valueConverted = float(variable - leftMin) / float(leftSpan)
+    return rightMin + (valueConverted * rightSpan)
+
+def healthbar(curHealth):
+
+    damageScale = convert(curHealth, 1, 10000, 0, 248)
+    pygame.draw.rect(screen, (255,255,255), (500,200,250,50), 2)
+    healthText = font.render(str(curHealth), True, (255, 0, 0))
+    pygame.draw.rect(screen, (255, 0, 0), (502, 202, damageScale, 48), 0)
+    screen.blit(healthText, (575, 150))
 
 def move(xDist, yDist, spd):
 
@@ -75,10 +90,19 @@ def move(xDist, yDist, spd):
 
 active = True
 
-startTime = pygame.time.get_ticks()
+
+timeElapsed = 0
+clock = pygame.time.Clock()
 while active:
     screen.fill((0,0,0))
-    time = pygame.time.get_ticks()
+    dt = clock.tick()
+
+    timeElapsed += dt
+
+    if timeElapsed > 300:
+        damageValue = random.randint(100, 600)
+        health -= damageValue
+        timeElapsed = 0
 
 
     for event in pygame.event.get():
@@ -96,6 +120,7 @@ while active:
     if (x > mX + buffer or x < mX - buffer) and (y < mY - buffer or y > mY + buffer):
         x += xVel
         y += yVel
-
-    player(x,y)
+    healthbar(health)
+    screen.blit(playerImage, (x,y))
+    screen.blit(baronImage, (530, 300))
     pygame.display.update()
